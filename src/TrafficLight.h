@@ -24,9 +24,13 @@ template <class T>
 class MessageQueue
 {
 public:
-    //T receive() {};
+    T receive() {
+        T msg = std::move(_queue.front());
+        _queue.pop_front();
+
+    }
     void send(T &&msg) {
-        
+        _queue.push_back(std::move(msg));
     }
 
 private:
