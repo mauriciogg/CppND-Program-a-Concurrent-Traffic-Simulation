@@ -36,9 +36,8 @@ void TrafficLight::waitForGreen()
     // runs and repeatedly calls the receive function on the message queue. 
     // Once it receives TrafficLightPhase::green, the method returns.
     while (true) {
-        TrafficLightPhase phase = _queue.receive();
-        if (phase == TrafficLightPhase::green) {
-            return;
+        if (_queue.receive() == TrafficLightPhase::green) {
+          return;
         }
     }
 }
@@ -83,7 +82,6 @@ void TrafficLight::cycleThroughPhases()
             cycleDuration = distr(eng);
             lastUpdate = now;
             _queue.send(std::move(_currentPhase));
-            std::cout << "Traffic light phase: " << static_cast<int>(_currentPhase)<< std::endl;
         }
     }
 }

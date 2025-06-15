@@ -34,6 +34,8 @@ public:
     }
     void send(T &&msg) {
         std::lock_guard<std::mutex> l(_mutex);
+        // All previous state is invalid
+        _queue.clear();
         _queue.push_back(std::move(msg));
         _condition.notify_one();
     }
