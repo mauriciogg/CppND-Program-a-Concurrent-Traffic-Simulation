@@ -25,12 +25,17 @@ class MessageQueue
 {
 public:
     T receive() {
+        std::unique_lock<std::mutex> l(_mutex);
+        _condition.wait(l, [this] { return !_queue.empty(); });
+        // l is still locked at this point. It will be released once out of scope
         T msg = std::move(_queue.front());
         _queue.pop_front();
-
+        return msg;
     }
     void send(T &&msg) {
+        std::lock_guard<std::mutex> l(_mutex);
         _queue.push_back(std::move(msg));
+        _condition.notify_one();
     }
 
 private:

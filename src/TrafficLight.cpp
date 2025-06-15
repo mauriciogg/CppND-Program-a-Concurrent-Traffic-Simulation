@@ -35,6 +35,12 @@ void TrafficLight::waitForGreen()
     // FP.5b : add the implementation of the method waitForGreen, in which an infinite while-loop 
     // runs and repeatedly calls the receive function on the message queue. 
     // Once it receives TrafficLightPhase::green, the method returns.
+    while (true) {
+        TrafficLightPhase phase = _queue.receive();
+        if (phase == TrafficLightPhase::green) {
+            return;
+        }
+    }
 }
 
 TrafficLightPhase TrafficLight::getCurrentPhase()
@@ -67,13 +73,19 @@ void TrafficLight::cycleThroughPhases()
     
     while (true)
     {
-        std::this_thread::sleep_for(std::chrono::milliseconds(cycleDuration));
-        _currentPhase = (_currentPhase == TrafficLightPhase::red) ? TrafficLightPhase::green : TrafficLightPhase::red;
-        cycleDuration = distr(eng);
-        _queue.send(std::move(_currentPhase));
-
-        // This part of the instructions is a bit unclear- sleep 1ms + the random value? or
-        // Sleep 1ms per iteration until time expires- both make no sense so doing the cheapest/
         std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        
+        auto now = std::chrono::system_clock::now();
+        auto timeElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - lastUpdate).count();
+        if (timeElapsed >= cycleDuration)
+        {
+            _currentPhase = (_currentPhase == TrafficLightPhase::red) ? TrafficLightPhase::green : TrafficLightPhase::red;
+            cycleDuration = distr(eng);
+            lastUpdate = now;
+            std::cout << "Traffic light phase: " << static_cast<int>(_currentPhase)<< std::endl;
+
+        }
+         _queue.send(std::move(_currentPhase));
+
     }
 }
