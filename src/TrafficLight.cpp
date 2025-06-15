@@ -82,10 +82,8 @@ void TrafficLight::cycleThroughPhases()
             _currentPhase = (_currentPhase == TrafficLightPhase::red) ? TrafficLightPhase::green : TrafficLightPhase::red;
             cycleDuration = distr(eng);
             lastUpdate = now;
+            _queue.send(std::move(_currentPhase));
             std::cout << "Traffic light phase: " << static_cast<int>(_currentPhase)<< std::endl;
-
         }
-         _queue.send(std::move(_currentPhase));
-
     }
 }
